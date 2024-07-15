@@ -13,6 +13,8 @@ import {
 await insertCoin({
 	gameId: import.meta.env.VITE_PLAYROOM_GAME_ID,
 	maxPlayersPerRoom: 2,
+	matchmaking: true,
+	// skipLobby: true,
 });
 
 const choiceIndexMap = ["Rock", "Paper", "Scissors"];
@@ -24,8 +26,10 @@ function App() {
 	const [games, setGames] = useMultiplayerState("games", []);
 	const playerChoices = usePlayersState("choice");
 
+	// console.log("allPlayer", allPlayer);
 	// console.log("games", games);
 	// console.log("playerChoices", playerChoices);
+	// console.log("thisPlayer", thisPlayer);
 
 	const endGame = () => {
 		if (isHost()) {
@@ -135,6 +139,7 @@ function App() {
 							}}
 						>
 							{playerName} is still making a choice
+							{/* Other Player is still making a choice */}
 						</div>
 						<div
 							style={{
@@ -143,6 +148,7 @@ function App() {
 							}}
 						>
 							{playerName} has made a choice
+							{/* Other Player has made a choice */}
 						</div>
 					</div>
 				);
@@ -153,6 +159,7 @@ function App() {
 					display: "flex",
 					justifyContent: "center",
 					alignItems: "center",
+					flexWrap: "wrap",
 				}}
 			>
 				{games.map((game, i) => {
