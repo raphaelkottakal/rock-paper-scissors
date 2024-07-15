@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import {
 	insertCoin,
 	isHost,
 	myPlayer,
 	usePlayerState,
-	usePlayersList,
 	useMultiplayerState,
 	usePlayersState,
 	resetPlayersStates,
@@ -22,68 +19,71 @@ const choiceIndexMap = ["Rock", "Paper", "Scissors"];
 
 function App() {
 	const thisPlayer = myPlayer();
+	const [isLocked, setIsLocked] = useState(false);
 	const [myChoice, setMyChoice] = usePlayerState(thisPlayer, "choice", null);
 	const [games, setGames] = useMultiplayerState("games", []);
 	const playerChoices = usePlayersState("choice");
 
-	// console.log(games);
+	// console.log("games", games);
+	// console.log("playerChoices", playerChoices);
 
 	const endGame = () => {
-		// console.log("Check winner");
-		const playerOne = playerChoices[0].state;
-		const playerTwo = playerChoices[1].state;
-		// console.log("playerOne", playerOne);
-		// console.log("playerTwo", playerTwo);
+		if (isHost()) {
+			// console.log("Check winner");
+			const playerOne = playerChoices[0]?.state;
+			const playerTwo = playerChoices[1]?.state;
+			// console.log("playerOne", playerOne);
+			// console.log("playerTwo", playerTwo);
 
-		if (playerOne === playerTwo) {
-			// console.log("Tie");
-			setGames([...games, { winnerId: null, playerChoices }]);
-		} else if (playerOne === 0) {
-			if (playerTwo === 1) {
-				// console.log("playerTwo wins");
-				setGames([
-					...games,
-					{ winnerId: playerChoices[1].player.id, playerChoices },
-				]);
-			} else {
-				// console.log("playerOne wins");
-				setGames([
-					...games,
-					{ winnerId: playerChoices[0].player.id, playerChoices },
-				]);
+			if (playerOne === playerTwo) {
+				// console.log("Tie");
+				setGames([...games, { winnerId: null, playerChoices }]);
+			} else if (playerOne === 0) {
+				if (playerTwo === 1) {
+					// console.log("playerTwo wins");
+					setGames([
+						...games,
+						{ winnerId: playerChoices[1].player.id, playerChoices },
+					]);
+				} else {
+					// console.log("playerOne wins");
+					setGames([
+						...games,
+						{ winnerId: playerChoices[0].player.id, playerChoices },
+					]);
+				}
+			} else if (playerOne === 2) {
+				if (playerTwo === 0) {
+					// console.log("playerTwo wins");
+					setGames([
+						...games,
+						{ winnerId: playerChoices[1].player.id, playerChoices },
+					]);
+				} else {
+					// console.log("playerOne wins");
+					setGames([
+						...games,
+						{ winnerId: playerChoices[0].player.id, playerChoices },
+					]);
+				}
+			} else if (playerOne === 1) {
+				if (playerTwo === 2) {
+					// console.log("playerTwo wins");
+					setGames([
+						...games,
+						{ winnerId: playerChoices[1].player.id, playerChoices },
+					]);
+				} else {
+					// console.log("playerOne wins");
+					setGames([
+						...games,
+						{ winnerId: playerChoices[0].player.id, playerChoices },
+					]);
+				}
 			}
-		} else if (playerOne === 2) {
-			if (playerTwo === 0) {
-				// console.log("playerTwo wins");
-				setGames([
-					...games,
-					{ winnerId: playerChoices[1].player.id, playerChoices },
-				]);
-			} else {
-				// console.log("playerOne wins");
-				setGames([
-					...games,
-					{ winnerId: playerChoices[0].player.id, playerChoices },
-				]);
-			}
-		} else if (playerOne === 1) {
-			if (playerTwo === 2) {
-				// console.log("playerTwo wins");
-				setGames([
-					...games,
-					{ winnerId: playerChoices[1].player.id, playerChoices },
-				]);
-			} else {
-				// console.log("playerOne wins");
-				setGames([
-					...games,
-					{ winnerId: playerChoices[0].player.id, playerChoices },
-				]);
-			}
+			resetPlayersStates();
 		}
-
-		// setGames([...games, { winnerId: thisPlayer.id, playerChoices }]);
-		resetPlayersStates();
+		setIsLocked(false);
 	};
 
 	useEffect(() => {
@@ -93,7 +93,12 @@ function App() {
 				bothPlayersReady = false;
 			}
 		});
-		if (bothPlayersReady && isHost()) endGame();
+		if (bothPlayersReady) {
+			setIsLocked(true);
+			setTimeout(() => {
+				endGame();
+			}, 1000);
+		}
 	}, [playerChoices]);
 
 	if (playerChoices.length !== 2) {
@@ -118,11 +123,12 @@ function App() {
 			>
 				{choiceIndexMap.map((choice, i) => (
 					<button
+						disabled={isLocked}
 						style={{
 							backgroundColor: i === myChoice ? "green" : "#1a1a1a",
 						}}
 						key={i}
-						onClick={() => setMyChoice(i)}
+						onClick={() => setMyChoice(i, true)}
 					>
 						{choice}
 					</button>
@@ -159,6 +165,7 @@ function App() {
 					</div>
 				);
 			})}
+			<div>Round {games.length + 1}</div>
 			<div
 				style={{
 					display: "flex",
