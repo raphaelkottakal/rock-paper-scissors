@@ -1,1 +1,1 @@
-# [Demo](https://raphaelkottakal.github.io/rock-paper-scissors/)
+# [Demo](https://raphaelkottakal.github.io/rock-paper-scissors)
