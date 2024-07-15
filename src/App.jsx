@@ -37,48 +37,30 @@ function App() {
 
 			if (playerOne === playerTwo) {
 				// console.log("Tie");
-				setGames([...games, { winnerId: null, playerChoices }]);
+				setGames([...games, { winnerId: null }]);
 			} else if (playerOne === 0) {
 				if (playerTwo === 1) {
 					// console.log("playerTwo wins");
-					setGames([
-						...games,
-						{ winnerId: playerChoices[1].player.id, playerChoices },
-					]);
+					setGames([...games, { winnerId: playerChoices[1].player.id }]);
 				} else {
 					// console.log("playerOne wins");
-					setGames([
-						...games,
-						{ winnerId: playerChoices[0].player.id, playerChoices },
-					]);
+					setGames([...games, { winnerId: playerChoices[0].player.id }]);
 				}
 			} else if (playerOne === 2) {
 				if (playerTwo === 0) {
 					// console.log("playerTwo wins");
-					setGames([
-						...games,
-						{ winnerId: playerChoices[1].player.id, playerChoices },
-					]);
+					setGames([...games, { winnerId: playerChoices[1].player.id }]);
 				} else {
 					// console.log("playerOne wins");
-					setGames([
-						...games,
-						{ winnerId: playerChoices[0].player.id, playerChoices },
-					]);
+					setGames([...games, { winnerId: playerChoices[0].player.id }]);
 				}
 			} else if (playerOne === 1) {
 				if (playerTwo === 2) {
 					// console.log("playerTwo wins");
-					setGames([
-						...games,
-						{ winnerId: playerChoices[1].player.id, playerChoices },
-					]);
+					setGames([...games, { winnerId: playerChoices[1].player.id }]);
 				} else {
 					// console.log("playerOne wins");
-					setGames([
-						...games,
-						{ winnerId: playerChoices[0].player.id, playerChoices },
-					]);
+					setGames([...games, { winnerId: playerChoices[0].player.id }]);
 				}
 			}
 			resetPlayersStates();
