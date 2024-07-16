@@ -1,73 +1,48 @@
-import { useEffect, useState } from "react";
-import "./App.css";
+import { useEffect, useRef, useState } from "react";
+import "./GameScreen.css";
 import {
-	insertCoin,
 	isHost,
 	myPlayer,
 	usePlayerState,
 	useMultiplayerState,
 	usePlayersState,
 	resetPlayersStates,
+	usePlayersList,
 } from "playroomkit";
+import { gsap } from "gsap/dist/gsap";
 
 const choiceIndexMap = ["Rock", "Paper", "Scissors"];
 
 function GameScreen() {
 	const thisPlayer = myPlayer();
-	const [isLocked, setIsLocked] = useState(false);
+	const playerList = usePlayersList();
+	const [otherPlayer, setOtherPlayer] = useState(null);
 	const [myChoice, setMyChoice] = usePlayerState(thisPlayer, "choice", null);
+	const playersChoices = usePlayersState("choice");
 	const [games, setGames] = useMultiplayerState("games", []);
-	const playerChoices = usePlayersState("choice");
+	const [isLocked, setIsLocked] = useState(false);
+	const [roundWinnerId, setRoundWinnerId] = useState(null);
+	const resultPopupRef = useRef();
 
-	// console.log("allPlayer", allPlayer);
-	// console.log("games", games);
-	// console.log("playerChoices", playerChoices);
-	// console.log("thisPlayer", thisPlayer);
+	const othersChoice = playersChoices.find(
+		(state) => state?.player?.id === otherPlayer?.id
+	)?.state;
 
-	const endGame = () => {
-		if (isHost()) {
-			// console.log("Check winner");
-			const playerOne = playerChoices[0]?.state;
-			const playerTwo = playerChoices[1]?.state;
-			// console.log("playerOne", playerOne);
-			// console.log("playerTwo", playerTwo);
+	const hasOthersMadeChoice =
+		othersChoice === 0 || othersChoice === 1 || othersChoice === 2;
 
-			if (playerOne === playerTwo) {
-				// console.log("Tie");
-				setGames([...games, { winnerId: null }]);
-			} else if (playerOne === 0) {
-				if (playerTwo === 1) {
-					// console.log("playerTwo wins");
-					setGames([...games, { winnerId: playerChoices[1].player.id }]);
-				} else {
-					// console.log("playerOne wins");
-					setGames([...games, { winnerId: playerChoices[0].player.id }]);
-				}
-			} else if (playerOne === 2) {
-				if (playerTwo === 0) {
-					// console.log("playerTwo wins");
-					setGames([...games, { winnerId: playerChoices[1].player.id }]);
-				} else {
-					// console.log("playerOne wins");
-					setGames([...games, { winnerId: playerChoices[0].player.id }]);
-				}
-			} else if (playerOne === 1) {
-				if (playerTwo === 2) {
-					// console.log("playerTwo wins");
-					setGames([...games, { winnerId: playerChoices[1].player.id }]);
-				} else {
-					// console.log("playerOne wins");
-					setGames([...games, { winnerId: playerChoices[0].player.id }]);
-				}
-			}
-			resetPlayersStates();
-		}
-		setIsLocked(false);
-	};
+	// console.log(playersChoices);
+	// console.log(othersChoice);
+	// console.log(games);
 
 	useEffect(() => {
+		setOtherPlayer(playerList.find((player) => player.id !== thisPlayer.id));
+	}, [playerList]);
+
+	useEffect(() => {
+		if (playersChoices.length === 1) return;
 		let bothPlayersReady = true;
-		playerChoices.forEach((playerState) => {
+		playersChoices.forEach((playerState) => {
 			if (playerState.state === null || playerState.state === undefined) {
 				bothPlayersReady = false;
 			}
@@ -76,104 +51,150 @@ function GameScreen() {
 			setIsLocked(true);
 			setTimeout(() => {
 				endGame();
-			}, 1000);
+			}, 500);
+			const onFirstFadeComplete = () => {
+				gsap.to(resultPopupRef.current, {
+					opacity: 0,
+					duration: 0.25,
+					delay: 1,
+					onComplete: () => {
+						setIsLocked(false);
+					},
+				});
+			};
+			gsap.to(resultPopupRef.current, {
+				opacity: 1,
+				delay: 0.5,
+				duration: 0.25,
+				onComplete: onFirstFadeComplete,
+			});
 		}
-	}, [playerChoices]);
+	}, [playersChoices]);
 
-	if (playerChoices.length !== 2) {
-		return (
-			<>
-				<h1>Rock Paper Scissors</h1>
-				<h2>Waiting for other player</h2>
-			</>
-		);
-	}
+	const handleRoundWinner = (winnerId) => {
+		setRoundWinnerId(winnerId);
+		if (isHost()) {
+			setGames([
+				...games,
+				{
+					winnerId: winnerId,
+					playersChoices: playersChoices.map((choice) => {
+						return { playerId: choice.player.id, state: choice.state };
+					}),
+				},
+			]);
+		}
+	};
+
+	const endGame = () => {
+		const playerOne = playersChoices[0]?.state;
+		const playerTwo = playersChoices[1]?.state;
+
+		if (playerOne === playerTwo) {
+			handleRoundWinner(null);
+		} else if (playerOne === 0) {
+			if (playerTwo === 1) {
+				handleRoundWinner(playersChoices[1].player.id);
+			} else {
+				handleRoundWinner(playersChoices[0].player.id);
+			}
+		} else if (playerOne === 2) {
+			if (playerTwo === 0) {
+				handleRoundWinner(playersChoices[1].player.id);
+			} else {
+				handleRoundWinner(playersChoices[0].player.id);
+			}
+		} else if (playerOne === 1) {
+			if (playerTwo === 2) {
+				handleRoundWinner(playersChoices[1].player.id);
+			} else {
+				handleRoundWinner(playersChoices[0].player.id);
+			}
+		}
+
+		if (isHost()) {
+			resetPlayersStates();
+		}
+	};
+
+	const handleChoiceClick = (index) => {
+		setMyChoice(index, true);
+	};
+
+	const roundWinnerText =
+		roundWinnerId === null
+			? "It's a Tie"
+			: roundWinnerId === thisPlayer.id
+			? "You Won!"
+			: "You lost...";
 
 	return (
 		<>
-			<h1>Rock Paper Scissors</h1>
-
-			<div
-				style={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-				}}
-			>
-				{choiceIndexMap.map((choice, i) => (
-					<button
-						disabled={isLocked}
-						style={{
-							backgroundColor: i === myChoice ? "green" : "#1a1a1a",
-						}}
-						key={i}
-						onClick={() => setMyChoice(i, true)}
-					>
-						{choice}
-					</button>
-				))}
+			<div id="main-container">
+				<div id="other-player-container">
+					{otherPlayer ? (
+						<div>
+							<div className="medium-text">
+								{otherPlayer.getProfile().name} is connected
+							</div>
+							<div
+								id="other-player-choice"
+								style={{
+									backgroundColor: hasOthersMadeChoice ? "green" : "#1a1a1a",
+								}}
+							>
+								{hasOthersMadeChoice ? "Choice Made" : "No Choice made"}
+							</div>
+						</div>
+					) : (
+						<div className="medium-text">Waiting for another player</div>
+					)}
+				</div>
+				<div id="this-player-container">
+					<div className="medium-text">
+						{otherPlayer ? "Make your choice" : "Waiting for another player"}
+					</div>
+					<div id="this-player-choice-container">
+						{choiceIndexMap.map((choice, i) => (
+							<button
+								disabled={playerList.length === 1 || isLocked}
+								style={{
+									backgroundColor: i === myChoice ? "green" : "#1a1a1a",
+								}}
+								key={i}
+								onClick={() => handleChoiceClick(i)}
+							>
+								{choice}
+							</button>
+						))}
+					</div>
+				</div>
 			</div>
 
-			{playerChoices.map((playerState, i) => {
-				// console.log(thisPlayer.id === player.id);
-				const isCurrentPlayer = thisPlayer.id === playerState.player.id;
-				const playerName = playerState.player.getProfile().name;
-				return (
-					<div
-						key={i}
-						style={{
-							display: isCurrentPlayer ? "none" : "block",
-						}}
-					>
-						<div
-							style={{
-								display: playerState.state === null ? "block" : "none",
-								color: "red",
-							}}
-						>
-							{playerName} is still making a choice
-							{/* Other Player is still making a choice */}
-						</div>
-						<div
-							style={{
-								display: playerState.state === null ? "none" : "block",
-								color: "green",
-							}}
-						>
-							{playerName} has made a choice
-							{/* Other Player has made a choice */}
-						</div>
-					</div>
-				);
-			})}
-			<div>Round {games.length + 1}</div>
-			<div
-				style={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-					flexWrap: "wrap",
-				}}
-			>
-				{games.map((game, i) => {
-					return (
-						<div
-							key={i}
-							style={{
-								width: 16,
-								height: 16,
-								borderRadius: "50%",
-								margin: 8,
-								backgroundColor:
-									game.winnerId !== null
-										? game.winnerId === thisPlayer.id
-											? "green"
-											: "red"
-										: "gray",
-							}}
-						></div>
-					);
-				})}
+			<div id="status-container">
+				<div>Rock Paper Scissors</div>
+				<div id="games-container">
+					{games.map((game, i) => {
+						return (
+							<div
+								key={i}
+								className="game-dot"
+								style={{
+									backgroundColor:
+										game.winnerId !== null
+											? game.winnerId === thisPlayer.id
+												? "green"
+												: "red"
+											: "gray",
+								}}
+							></div>
+						);
+					})}
+				</div>
+			</div>
+
+			<div ref={resultPopupRef} id="result-popup">
+				{games.length !== 0 && roundWinnerText}
 			</div>
 		</>
 	);
