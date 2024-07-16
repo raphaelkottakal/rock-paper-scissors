@@ -6,11 +6,7 @@
 }
 
 #other-player-container {
-	background: linear-gradient(
-		180deg,
-		rgba(255, 255, 255, 1) 0%,
-		rgba(100, 149, 237, 1) 30%
-	);
+	background: indianred;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -26,14 +22,11 @@
 #other-player-choice {
 	color: white;
 	padding: 4px;
+	border-radius: 8px;
 }
 
 #this-player-container {
-	background: linear-gradient(
-		0deg,
-		rgba(255, 255, 255, 1) 0%,
-		rgba(255, 127, 80, 1) 30%
-	);
+	background: coral;
 	display: flex;
 	justify-content: center;
 	align-items: center;
