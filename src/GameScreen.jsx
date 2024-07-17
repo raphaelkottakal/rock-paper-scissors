@@ -8,6 +8,8 @@ import {
 	usePlayersState,
 	resetPlayersStates,
 	usePlayersList,
+	getDiscordServerData,
+	setDiscordServerData,
 } from "playroomkit";
 import { gsap } from "gsap/dist/gsap";
 
@@ -34,6 +36,21 @@ function GameScreen() {
 	// console.log(playersChoices);
 	// console.log(othersChoice);
 	// console.log(games);
+
+	useEffect(() => {
+		const init = async () => {
+			const data = await getDiscordServerData("leaderboard");
+			console.log("data", data);
+			setTimeout(async () => {
+				const sentData = await setDiscordServerData("leaderboard", {
+					topScore: Math.random() * 1000,
+					topPlayer: "Alice",
+				});
+				console.log("sentData", sentData);
+			}, 3000);
+		};
+		init();
+	}, []);
 
 	useEffect(() => {
 		setOtherPlayer(playerList.find((player) => player.id !== thisPlayer.id));
