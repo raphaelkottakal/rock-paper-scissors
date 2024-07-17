@@ -33,24 +33,26 @@ function GameScreen() {
 	const hasOthersMadeChoice =
 		othersChoice === 0 || othersChoice === 1 || othersChoice === 2;
 
+	// console.log(thisPlayer);
 	// console.log(playersChoices);
 	// console.log(othersChoice);
-	// console.log(games);
+	console.log(games);
 
-	useEffect(() => {
-		const init = async () => {
-			const data = await getDiscordServerData("leaderboard");
-			console.log("data", data);
-			setTimeout(async () => {
-				const sentData = await setDiscordServerData("leaderboard", {
-					topScore: Math.random() * 1000,
-					topPlayer: "Alice",
-				});
-				console.log("sentData", sentData);
-			}, 3000);
-		};
-		init();
-	}, []);
+	// useEffect(() => {
+	// 	const init = async () => {
+	// 		const data = await getDiscordServerData("leaderboard");
+	// 		console.log("data", data);
+	// 		// window.alert(JSON.stringify(data));
+	// 		setTimeout(async () => {
+	// 			const sentData = await setDiscordServerData("leaderboard", {
+	// 				topScore: Math.random() * 1000,
+	// 				topPlayer: "Alice",
+	// 			});
+	// 			console.log("sentData", sentData);
+	// 		}, 3000);
+	// 	};
+	// 	init();
+	// }, []);
 
 	useEffect(() => {
 		setOtherPlayer(playerList.find((player) => player.id !== thisPlayer.id));

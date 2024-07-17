@@ -12,7 +12,7 @@ function App() {
 				maxPlayersPerRoom: 2,
 				// skipLobby: true,
 				matchmaking: true,
-				discord: true,
+				// discord: true,
 			});
 			setReady(true);
 		};
