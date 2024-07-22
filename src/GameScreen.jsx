@@ -31,9 +31,10 @@ function GameScreen() {
 	const hasOthersMadeChoice =
 		othersChoice === 0 || othersChoice === 1 || othersChoice === 2;
 
+	// console.log(thisPlayer);
 	// console.log(playersChoices);
 	// console.log(othersChoice);
-	// console.log(games);
+	console.log("playerList", playerList);
 
 	useEffect(() => {
 		setOtherPlayer(playerList.find((player) => player.id !== thisPlayer.id));
